@@ -16,6 +16,10 @@ func main() {
 	cfg := loadConfig()
 	mux := http.NewServeMux()
 
+	if cfg.debug {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", cfg.port),
 		Handler:      mux,
