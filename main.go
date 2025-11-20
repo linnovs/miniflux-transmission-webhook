@@ -25,7 +25,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	log.Info("Starting server", "addr", server.Addr)
+	log.Info("starting server", "addr", server.Addr)
 
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("Failed to start server", "error", err)
