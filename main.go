@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	httpLogger := log.NewWithOptions(os.Stderr, log.Options{Prefix: "http"})
+	httpLogger := log.NewWithOptions(os.Stderr, log.Options{Prefix: "http.Server"})
 	httpStdlog := httpLogger.StandardLog(log.StandardLogOptions{ForceLevel: log.ErrorLevel})
 
 	cfg := loadConfig()
