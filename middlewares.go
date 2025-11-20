@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"crypto"
+	"crypto/hmac"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -60,5 +65,39 @@ func loggingMiddleware(handler http.Handler) http.Handler {
 			"status", w.(*loggingResponseWriter).statusCode,
 			"ressponeTime", time.Since(start).String(),
 		)
+	})
+}
+
+func computeHMAC(body []byte, secret string) string {
+	mac := hmac.New(crypto.SHA256.New, []byte(secret))
+	mac.Write(body)
+
+	return fmt.Sprintf("%x", mac.Sum(nil))
+}
+
+func minifluxValidateSignatureMiddleware(secret string, handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		signature := r.Header.Get("X-Miniflux-Signature")
+
+		bodyBytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
+			return
+		}
+
+		if err := r.Body.Close(); err != nil { // Close the original body
+			http.Error(w, "Failed to close request body", http.StatusInternalServerError)
+			return
+		}
+
+		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+
+		hash := computeHMAC(bodyBytes, secret)
+		if hash != signature {
+			http.Error(w, "Invalid signature", http.StatusUnauthorized)
+			return
+		}
+
+		handler.ServeHTTP(w, r)
 	})
 }

@@ -4,12 +4,14 @@ import "github.com/charmbracelet/log"
 
 type config struct {
 	port           string
+	minifluxSecret string
 	debug          bool
 }
 
 func loadConfig() *config {
 	cfg := &config{
 		port:           getEnv("PORT", "8080"),
+		minifluxSecret: getEnv("MINIFLUX_SECRET", ""),
 		debug:          getEnv("DEBUG", "false") == "true",
 	}
 
