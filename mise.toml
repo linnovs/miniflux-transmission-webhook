@@ -1,2 +1,5 @@
 [tools]
 air = "latest"
+direnv = "latest"
+go = "1.25"
+golangci-lint = "latest"
