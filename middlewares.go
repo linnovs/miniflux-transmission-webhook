@@ -33,11 +33,11 @@ func loggingMiddleware(handler http.Handler) http.Handler {
 		start := time.Now()
 		w = newLoggingResponseWriter(w)
 		logger := log.With(
-			"remote_addr", r.RemoteAddr,
+			"remoteAddr", r.RemoteAddr,
 			"host", r.Host,
 			"method", r.Method,
 			"uri", r.RequestURI,
-			"user_agent", r.UserAgent(),
+			"userAgent", r.UserAgent(),
 		)
 		r = r.WithContext(context.WithValue(r.Context(), log.ContextKey, logger))
 
@@ -45,7 +45,7 @@ func loggingMiddleware(handler http.Handler) http.Handler {
 		logger.Info(
 			"request completed",
 			"status", w.(*loggingResponseWriter).statusCode,
-			"resspone_time", time.Since(start).String(),
+			"ressponeTime", time.Since(start).String(),
 		)
 	})
 }
