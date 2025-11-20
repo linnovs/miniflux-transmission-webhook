@@ -13,10 +13,11 @@ func main() {
 	httpLogger := log.NewWithOptions(os.Stderr, log.Options{Prefix: "http"})
 	httpStdlog := httpLogger.StandardLog(log.StandardLogOptions{ForceLevel: log.ErrorLevel})
 
+	cfg := loadConfig()
 	mux := http.NewServeMux()
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", getEnv("PORT", "8080")),
+		Addr:         fmt.Sprintf(":%s", cfg.port),
 		Handler:      mux,
 		ErrorLog:     httpStdlog,
 		ReadTimeout:  10 * time.Second,
