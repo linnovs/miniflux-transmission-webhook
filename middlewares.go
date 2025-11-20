@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 	"time"
 
@@ -28,11 +30,22 @@ func newLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 	return &loggingResponseWriter{w, http.StatusOK}
 }
 
+func rndID() string {
+	const byteSize = 8
+
+	rndBytes := make([]byte, byteSize)
+	rand.Read(rndBytes) // nolint:errcheck,gosec
+
+	return base64.RawURLEncoding.EncodeToString(rndBytes)
+}
+
 func loggingMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		id := rndID()
 		w = newLoggingResponseWriter(w)
 		logger := log.With(
+			"requestID", id,
 			"remoteAddr", r.RemoteAddr,
 			"host", r.Host,
 			"method", r.Method,
