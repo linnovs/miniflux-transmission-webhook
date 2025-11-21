@@ -15,7 +15,12 @@ func main() {
 
 	cfg := loadConfig()
 	mux := http.NewServeMux()
+	middlewares := []func(http.Handler) http.Handler{
+		loggingMiddleware,
+		newMinifluxValidateSignatureMiddleware(cfg.minifluxSecret),
+	}
 
+	mux.Handle("POST /", chainMiddlewares(nil, middlewares...))
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", cfg.port),

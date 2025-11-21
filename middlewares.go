@@ -15,6 +15,17 @@ import (
 	"github.com/charmbracelet/log"
 )
 
+func chainMiddlewares(
+	handler http.Handler,
+	middlewares ...func(http.Handler) http.Handler,
+) http.Handler {
+	for _, middleware := range middlewares {
+		handler = middleware(handler)
+	}
+
+	return handler
+}
+
 type loggingResponseWriter struct {
 	http.ResponseWriter
 	statusCode int
@@ -73,6 +84,12 @@ func computeHMAC(body []byte, secret string) string {
 	mac.Write(body)
 
 	return fmt.Sprintf("%x", mac.Sum(nil))
+}
+
+func newMinifluxValidateSignatureMiddleware(secret string) func(http.Handler) http.Handler {
+	return func(h http.Handler) http.Handler {
+		return minifluxValidateSignatureMiddleware(secret, h)
+	}
 }
 
 func minifluxValidateSignatureMiddleware(secret string, handler http.Handler) http.Handler {
